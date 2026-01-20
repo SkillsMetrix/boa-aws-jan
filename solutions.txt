@@ -1,7 +1,7 @@
- 
-  sudo apt-get install apache2
- 
-  systemctl status apache2
- 
-https://www.youtube.com/watch?v=eOBq__h4OJ4
-https://survey.zohopublic.com/zs/ZlBhOM
+def lambda_handler(event,context):
+    name= event.get("name","Guest")
+    age= event.get("age",None)
+    return {
+        "message": f"Hello: {name}",
+        "age": age
+    }
