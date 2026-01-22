@@ -6,3 +6,30 @@
     "arguments": $utils.toJson($context.arguments)
  }
  }
+
+
+
+---
+
+
+import json
+import boto3
+
+def lambda_handler(event, context):
+       
+    response = "The method not defined"
+    client = boto3.resource('dynamodb')
+    table = client.Table("dojowork")
+       
+    if (event["method"] == "getTask"):
+           
+        response = table.get_item(Key={'id': event["arguments"]["id"]})
+        return response
+           
+    elif (event["method"] == "addTask"):
+           
+        response = table.put_item(Item={'id': event["arguments"]["id"], 'description': event["arguments"]["description"]})
+        return response
+           
+    else:
+        return response
