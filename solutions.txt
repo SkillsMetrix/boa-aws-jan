@@ -1,5 +1,6 @@
 https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow
 
+git clone https://github.com/aws-samples/eb-java-scorekeep.git xray-scorekeep -b xray-gettingstarted
 
 
 import json
