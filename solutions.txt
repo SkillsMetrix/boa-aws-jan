@@ -1,1 +1,11 @@
 https://auth0.com/docs/get-started/authentication-and-authorization-flow/authorization-code-flow
+
+
+
+import boto3
+
+ssm =boto3.client('ssm', region_name="us-east-1")
+
+def lambda_handler(event,context):
+    db_url=ssm.get_parameters(Names=["/user-app/dev/boa"])
+    print (db_url)
