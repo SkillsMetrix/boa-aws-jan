@@ -22,3 +22,12 @@ def lambda_handler(event,context):
     print(get_secret_value_response)
     secret= get_secret_value_response['SecretString']
     print (secret)
+--------------
+
+
+
+FROM ubuntu
+
+RUN apt-get update
+
+CMD [ "echo", "welcome to my custom Image" ]
