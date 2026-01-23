@@ -38,3 +38,8 @@ CMD [ "echo", "welcome to my custom Image" ]
 https://kubernetes.io/docs/tasks/tools/install-kubectl-linux/#install-kubectl-binary-with-curl-on-linux
 
 https://docs.aws.amazon.com/eks/latest/eksctl/installation.html
+
+
+
+
+eksctl create cluster --name my-eks-cluster --region us-west-2 --nodegroup-name my-nodegroup --node-type t2.small --nodes 2 --nodes-min 1 --nodes-max 5 --managed
