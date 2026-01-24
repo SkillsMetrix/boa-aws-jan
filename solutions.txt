@@ -69,7 +69,7 @@ def lambda_handler(event, context):
 import json
 import boto3
 
-# Create client once (best practice)
+ 
 bedrock = boto3.client(
     service_name="bedrock-runtime",
     region_name="us-east-1"
