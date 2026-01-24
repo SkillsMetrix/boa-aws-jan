@@ -43,3 +43,21 @@ https://docs.aws.amazon.com/eks/latest/eksctl/installation.html
 
 
 eksctl create cluster --name my-eks-cluster --region us-west-2 --nodegroup-name my-nodegroup --node-type t2.small --nodes 2 --nodes-min 1 --nodes-max 5 --managed
+
+
+import boto3
+
+def lambda_handler(event, context):
+    client = boto3.client("bedrock", region_name="us-east-1")
+
+    models = client.list_foundation_models()
+
+    model_ids = []
+    for m in models["modelSummaries"]:
+        model_ids.append(m["modelId"])
+
+    # Lambda must RETURN, not print
+    return {
+        "statusCode": 200,
+        "body": model_ids
+    }
