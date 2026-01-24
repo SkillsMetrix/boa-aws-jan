@@ -124,3 +124,119 @@ def lambda_handler(event, context):
             })
         }
 
+---------
+
+
+import boto3
+import json
+from datetime import datetime
+from botocore.config import Config
+
+# Clients (created once)
+bedrock = boto3.client(
+    "bedrock-runtime",
+    region_name="us-east-1",
+    config=Config(read_timeout=300, retries={"max_attempts": 3})
+)
+
+s3 = boto3.client("s3")
+
+
+def blog_generate_using_bedrock(blogtopic: str) -> str:
+    """
+    Generates a 200-word blog using Amazon Nova Lite
+    """
+
+    prompt = f"Write a 200 word blog on the topic: {blogtopic}"
+
+    payload = {
+        "messages": [
+            {
+                "role": "user",
+                "content": [
+                    {"text": prompt}
+                ]
+            }
+        ],
+        "inferenceConfig": {
+            "maxTokens": 512,
+            "temperature": 0.5,
+            "topP": 0.9
+        }
+    }
+
+    try:
+        response = bedrock.invoke_model(
+            modelId="amazon.nova-lite-v1:0",    
+            body=json.dumps(payload),
+            accept="application/json",
+            contentType="application/json"
+        )
+
+        response_body = json.loads(response["body"].read())
+
+        blog_text = response_body["output"]["message"]["content"][0]["text"]
+        return blog_text
+
+    except Exception as e:
+        print(f"Error generating the blog: {e}")
+        return ""
+
+
+def save_blog_details_s3(s3_key: str, s3_bucket: str, blog_content: str):
+    try:
+        s3.put_object(
+            Bucket=s3_bucket,
+            Key=s3_key,
+            Body=blog_content.encode("utf-8"),
+            ContentType="text/plain"
+        )
+        print("Blog saved to S3")
+
+    except Exception as e:
+        print(f"Error saving blog to S3: {e}")
+
+
+def lambda_handler(event, context):
+    """
+    Expected API Gateway request:
+    {
+        "blog_topic": "Generative AI in Healthcare"
+    }
+    """
+
+    try:
+        # API Gateway safe parsing
+        body = json.loads(event.get("body", "{}"))
+        blogtopic = body.get("blog_topic")
+
+        if not blogtopic:
+            return {
+                "statusCode": 400,
+                "body": json.dumps("blog_topic is required")
+            }
+
+        generate_blog = blog_generate_using_bedrock(blogtopic)
+
+        if generate_blog:
+            current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+            s3_key = f"blog-output/{current_time}.txt"
+            s3_bucket = "amar-dem-buk"
+
+            save_blog_details_s3(s3_key, s3_bucket, generate_blog)
+
+            return {
+                "statusCode": 200,
+                "body": json.dumps("Blog generation completed and saved to S3")
+            }
+        else:
+            return {
+                "statusCode": 500,
+                "body": json.dumps("Blog generation failed")
+            }
+
+    except Exception as e:
+        return {
+            "statusCode": 500,
+            "body": json.dumps(str(e))
+        }
